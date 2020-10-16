@@ -1,0 +1,127 @@
+﻿@page "/"
+
+@using Microsoft.Extensions.Logging
+@using BlazorApp.Services.Interfaces
+@using BlazorApp.Services.Models
+@using BlazorApp.Services.Constant
+@using BlazorApp.Services.Extensions;
+
+@inject ICardService covidService
+@inject ILogger<Index> logger
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-lg-3">
+                <button class="btn btn-block btn-primary btn-lg" @onclick="InitializeCards">Reset</button>
+            </div><!-- /.col -->
+            <div class="col-lg-3">
+                <button class="btn btn-block btn-primary btn-lg" @onclick="ShuffleCards">Shuffle Cards</button>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+
+
+        @if (cards == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <!-- Small boxes (Stat box) -->
+            <div class="row">
+                @foreach (var card in cards)
+                {
+                    <div class="col-lg-3 col-6">
+                        <!-- small box -->
+                        <div class="card" style="background-color: darkgray;">
+                            <div class="card-title" style="text-align: left; margin-left: 8px; margin-top: 8px;">
+                                <h1>
+                                    @getCardNumber(card.CardNumber)
+                                </h1>
+                            </div>
+                            <div class="card-img- " style="text-align: center">
+                                <img class="card-img-" src=@getImage(@card.CardType)
+                                     alt=@card.CardType.GetCardTypeName()>
+                            </div>
+
+                            <div class="card-title" style="position: absolute; bottom: 8px; right: 16px; ">
+                                <h1>
+                                    @getCardNumber(card.CardNumber)
+                                </h1>
+                            </div>
+                            <br />
+                            <br />
+                        </div>
+                    </div>
+                }
+            </div>
+
+        }
+    </div>
+
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-lg-3">
+                <button class="btn btn-block btn-primary btn-lg" @onclick="InitializeCards">Reset</button>
+            </div><!-- /.col -->
+            <div class="col-lg-3">
+                <button class="btn btn-block btn-primary btn-lg" @onclick="ShuffleCards">Shuffle Cards</button>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>
+
+
+@code {
+    private IEnumerable<Card> cards;
+    private ICardService _cardService;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _cardService = covidService;
+        InitializeCards();
+    }
+
+    private void ShuffleCards()
+    {
+        cards = _cardService.ShuffleCards(); ;
+    }
+
+    private void InitializeCards()
+    {
+        cards = _cardService.GetInitialCards();
+    }
+
+    protected string getImage(CardTypeEnum cardType)
+    {
+        switch (cardType)
+        {
+            case CardTypeEnum.Diamond:
+                return "../dist/img/suits/diamond.png";
+            case CardTypeEnum.Flower:
+                return "../dist/img/suits/flower.png";
+            case CardTypeEnum.Heart:
+                return "../dist/img/suits/heart.png";
+            case CardTypeEnum.Spade:
+                return "../dist/img/suits/spade.png";
+            default:
+                return "";
+        }
+    }
+
+    protected string getCardNumber(int cardNumber)
+    {
+        if (cardNumber == 1) return "A";
+        else if (cardNumber == 11) return "J";
+        else if (cardNumber == 12) return "Q";
+        else if (cardNumber == 13) return "K";
+        return cardNumber.ToString();
+    }
+
+}
